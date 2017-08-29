@@ -24,3 +24,7 @@ clean:
 	for i in $(OBJS); do (if test -e "$$i"; then ( rm $$i ); fi ); done
 	@rm -f $(BIN) $(LIB)
 
+# Custom install rule to allow global installation of hello_video.
+# This is NOT in the upstream code and needs to be kept for the video looper install to work.
+install:
+	cp $(BIN) /usr/local/bin/
