@@ -44,6 +44,7 @@ static int video_decode_test(char *filename, int loop)
    ILCLIENT_T *client;
    FILE *in;
    int status = 0;
+   unsigned int playcount = 0;
    unsigned int data_len = 0;
 
    memset(list, 0, sizeof(list));
@@ -155,11 +156,15 @@ static int video_decode_test(char *filename, int loop)
          }
          if(!data_len) {
             // Finished reading the file, either loop or exit.
-            if (loop) {
-               fseek(in, 0, SEEK_SET);
-            }
-            else {
-               break;
+            if (loop<0) {
+                fseek(in, 0, SEEK_SET);
+            } else {
+                playcount++;
+                if (playcount<loop){
+                   fseek(in, 0, SEEK_SET); 
+                }else{
+                    break;
+                }
             }
          }
 
@@ -240,7 +245,7 @@ int main (int argc, char **argv)
       }
    }
    bcm_host_init();
-   return video_decode_test(argv[argc-1], loop);
+   return video_decode_test(argv[argc-1], 3);
 }
 
 
