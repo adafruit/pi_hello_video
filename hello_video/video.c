@@ -44,6 +44,7 @@ static int video_decode_test(char *filename, int loop)
    ILCLIENT_T *client;
    FILE *in;
    int status = 0;
+   unsigned int playcount = 0;
    unsigned int data_len = 0;
 
    memset(list, 0, sizeof(list));
@@ -155,11 +156,15 @@ static int video_decode_test(char *filename, int loop)
          }
          if(!data_len) {
             // Finished reading the file, either loop or exit.
-            if (loop) {
-               fseek(in, 0, SEEK_SET);
-            }
-            else {
-               break;
+            if (loop<0) {
+                fseek(in, 0, SEEK_SET);
+            } else {
+                playcount++;
+                if (playcount<loop){
+                   fseek(in, 0, SEEK_SET); 
+                }else{
+                    break;
+                }
             }
          }
 
@@ -217,7 +222,7 @@ static int video_decode_test(char *filename, int loop)
 }
 
 void error_usage(char* name) {
-   printf("Usage: %s [--loop] <filename>\n", name);
+   printf("Usage: %s [--loop[=5]] <filename>\n", name);
    exit(1);
 }
 
@@ -230,10 +235,19 @@ int main (int argc, char **argv)
    }
    // Check optional parameter.
    if (argc == 3) {
-      // Check for loop parameter.
-      if (strcmp(argv[1], "--loop") == 0) {
-         loop = 1;
-      }
+    // Check for loop parameter.
+    if (strncmp(argv[1], "--loop", 6) == 0) {
+        loop = -1;
+        if (strncmp(argv[1], "--loop=", 7) == 0){
+            if (strlen(argv[1]) <= 7){
+                error_usage(argv[0]);
+            }else{
+                char *tmp = argv[1];
+                tmp += 7;
+                loop = atoi(tmp);
+            }
+        }
+    }
       // Error unknown parameter.
       else {
          error_usage(argv[0]);
