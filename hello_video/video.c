@@ -222,7 +222,7 @@ static int video_decode_test(char *filename, int loop)
 }
 
 void error_usage(char* name) {
-   printf("Usage: %s [--loop] <filename>\n", name);
+   printf("Usage: %s [--loop[=5]] <filename>\n", name);
    exit(1);
 }
 
@@ -235,17 +235,26 @@ int main (int argc, char **argv)
    }
    // Check optional parameter.
    if (argc == 3) {
-      // Check for loop parameter.
-      if (strcmp(argv[1], "--loop") == 0) {
-         loop = 1;
-      }
+    // Check for loop parameter.
+    if (strncmp(argv[1], "--loop", 6) == 0) {
+        loop = -1;
+        if (strncmp(argv[1], "--loop=", 7) == 0){
+            if (strlen(argv[1]) <= 7){
+                error_usage(argv[0]);
+            }else{
+                char *tmp = argv[1];
+                tmp += 7;
+                loop = atoi(tmp);
+            }
+        }
+    }
       // Error unknown parameter.
       else {
          error_usage(argv[0]);
       }
    }
    bcm_host_init();
-   return video_decode_test(argv[argc-1], 3);
+   return video_decode_test(argv[argc-1], loop);
 }
 
 
